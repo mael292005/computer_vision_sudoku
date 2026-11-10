@@ -74,6 +74,8 @@ def extract_digit(cell: Image, size: int = DEFAULT_VISION.digit_size) -> Image |
     if len(xs) == 0:
         return None
     y0, y1 = int(np.min(ys)), int(np.max(ys)) + 1
+    if (y1 - y0) / height < DEFAULT_VISION.min_digit_height_ratio:
+        return None  # une poussière ou un reflet, pas un chiffre
     x0, x1 = int(np.min(xs)), int(np.max(xs)) + 1
     digit = keep[y0:y1, x0:x1]
 

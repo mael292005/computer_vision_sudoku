@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import cvModule from "@techstark/opencv-js";
 import * as ort from "onnxruntime-web";
+import jpeg from "jpeg-js";
 import { PNG } from "pngjs";
 
 import { parseGrid } from "../js/solver.js";
@@ -46,8 +47,11 @@ export function loadSamples() {
     }));
 }
 
-/** Charge un PNG en Mat RGBA, comme cv.imread sur un canvas dans le navigateur. */
+/** Charge un PNG ou un JPEG en Mat RGBA, comme cv.imread sur un canvas dans le navigateur. */
 export function readPng(cv, path) {
-  const png = PNG.sync.read(readFileSync(path));
-  return cv.matFromImageData({ data: png.data, width: png.width, height: png.height });
+  const bytes = readFileSync(path);
+  const image = /\.jpe?g$/i.test(path)
+    ? jpeg.decode(bytes, { useTArray: true, formatAsRGBA: true })
+    : PNG.sync.read(bytes);
+  return cv.matFromImageData({ data: image.data, width: image.width, height: image.height });
 }

@@ -16,14 +16,14 @@ Il est aussi livré avec **un site web local** (déposer une capture de grille, 
 
 ## Résultats
 
-Mesurés avec `sudoku-vision benchmark` sur 11 captures d'écran complètes de **3 sites différents**, chacun avec sa propre police et ses propres couleurs. Aucune de ces captures n'a servi à construire les modèles : elles ne servent qu'à l'évaluation.
+Mesurés avec `sudoku-vision benchmark` sur 13 images : 11 captures d'écran complètes de **3 sites différents** (chacun avec sa propre police et ses propres couleurs) et **2 photos d'un écran prises au téléphone**. Aucune de ces images n'a servi à construire les modèles : elles ne servent qu'à l'évaluation.
 
 | Étape | Résultat |
 | --- | --- |
-| Détection de la grille | 11 / 11 grilles |
-| Cases vides ou pleines | 891 / 891 cases |
-| Lecture des chiffres (CNN) | 338 / 338 chiffres |
-| Grilles résolues de bout en bout | 11 / 11 |
+| Détection de la grille | 13 / 13 grilles |
+| Cases vides ou pleines | 1 053 / 1 053 cases |
+| Lecture des chiffres (CNN) | 406 / 406 chiffres |
+| Grilles résolues de bout en bout | 13 / 13 |
 | Temps total, de l'image à la solution | environ 40 ms |
 
 **Généraliser à d'autres sites.** Le projet a d'abord été construit sur websudoku.com, dont la police est une Times. Testé ensuite sur sudoku.com et Online Sudoku, qui utilisent des polices sans empattements, le premier CNN confondait presque tous les « 1 » avec des « 4 » et les « 3 » avec des « 5 ». Plutôt que d'entraîner sur ces captures, ce qui aurait faussé l'évaluation, les données synthétiques ont été élargies de 12 à 50 polices web courantes, en graisses variées. Les captures sont restées un test que le modèle n'a jamais vu.
@@ -46,6 +46,8 @@ Mesurés avec `sudoku-vision benchmark` sur 11 captures d'écran complètes de *
 | Réduite à 25 % + flou de 1,5 px | 57 / 115 | 91 / 115 |
 
 Le CNN est le classifieur utilisé par défaut. Le template matching reste une référence utile, simple et sans entraînement, mais il ne connaît qu'une police.
+
+**Les photos et les « chiffres fantômes ».** Sur une photo d'écran prise au téléphone, une poussière ou un reflet dans une case vide était conservé, agrandi à la taille d'un chiffre, et le CNN, obligé de répondre, inventait un « 4 ». Mesure faite : un vrai chiffre occupe au moins 39 % de la hauteur de sa case, ces taches au plus 8 %. Tout ce qui fait moins de 20 % est désormais ignoré, ce qui supprime les fantômes sans toucher aux vrais chiffres.
 
 ## Fonctionnement
 
@@ -184,7 +186,7 @@ sudoku-vision benchmark
 
 ## Jeu de test
 
-`tests/data/` contient 11 captures d'écran complètes : 4 de websudoku.com (Easy à Evil), 6 de sudoku.com (Easy à Extreme) et 1 d'Online Sudoku. `grids.json` donne, pour chacune, le site et les chiffres attendus. Chaque grille annotée a exactement une solution, ce qui confirme que la recopie est juste. Les tests vérifient chaque étape du pipeline sur ces 11 captures, en Python comme en JavaScript.
+`tests/data/` contient 11 captures d'écran complètes : 4 de websudoku.com (Easy à Evil), 6 de sudoku.com (Easy à Extreme) et 1 d'Online Sudoku. `grids.json` donne, pour chacune, le site et les chiffres attendus. Chaque grille annotée a exactement une solution, ce qui confirme que la recopie est juste. S'y ajoutent 2 photos d'un écran prises au téléphone. Les tests vérifient chaque étape du pipeline sur ces 13 images, en Python, en JavaScript et en Dart.
 
 ## Réentraîner les modèles
 

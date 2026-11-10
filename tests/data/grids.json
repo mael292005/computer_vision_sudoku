@@ -1,5 +1,5 @@
 {
-  "_description": "Vérité terrain du jeu de test : chiffres visibles sur chaque capture d'écran, ligne par ligne. Le point (.) désigne une case vide. Aucune de ces captures ne sert à construire les modèles.",
+  "_description": "Vérité terrain du jeu de test : chiffres visibles sur chaque image (captures d'écran et photos prises au téléphone), ligne par ligne. Le point (.) désigne une case vide. Aucune de ces images ne sert à construire les modèles.",
   "websudoku_easy.png": {
     "level": "Easy",
     "puzzle_id": "5,798,177,265",
@@ -167,6 +167,36 @@
       "6.5....31",
       "..3.7..84",
       "....5297."
+    ]
+  },
+  "photo_ecran_1.jpg": {
+    "site": "photo d'écran (thesudoku.com)",
+    "level": "Débutant",
+    "grid": [
+      "..7..1864",
+      "1...6.5.7",
+      "...43....",
+      "7....9.1.",
+      ".492.367.",
+      ".1.7....8",
+      "....46...",
+      "2.1.9...6",
+      "4651..9.."
+    ]
+  },
+  "photo_ecran_2.jpg": {
+    "site": "photo d'écran (thesudoku.com)",
+    "level": "Débutant",
+    "grid": [
+      "..7..1864",
+      "1...6.5.7",
+      "...43....",
+      "7....9.1.",
+      ".492.367.",
+      ".1.7....8",
+      "....46...",
+      "2.1.9...6",
+      "4651..9.."
     ]
   }
 }

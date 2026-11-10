@@ -36,6 +36,14 @@ class VisionConfig:
     digit_size: int = 28
     """Côté, en pixels, de l'image de chiffre donnée au classifieur (format MNIST)."""
 
+    min_digit_height_ratio: float = 0.2
+    """Hauteur minimale de l'encre, en part de la case, pour qu'il s'agisse d'un chiffre.
+
+    Mesuré : au moins 39 % pour un vrai chiffre, au plus 8 % pour une poussière ou
+    un reflet sur une photo d'écran. Sans ce seuil, un simple point était agrandi
+    à la taille d'un chiffre et le CNN inventait un « 4 ».
+    """
+
 
 @dataclass(frozen=True)
 class ActuatorConfig:

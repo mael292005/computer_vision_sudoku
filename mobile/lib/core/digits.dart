@@ -12,6 +12,7 @@ const double emptyCellInkRatio = 0.01;
 const int minContrast = 60;
 const int digitSize = 28;
 const int digitBox = 20;
+const double minDigitHeightRatio = 0.2;
 
 /// Découpe la grille redressée en 9x9 cases, marges rognées.
 List<List<GrayImage>> splitCells(GrayImage warped) {
@@ -84,6 +85,8 @@ Uint8List? extractDigit(GrayImage cell) {
     if (y > maxY) maxY = y;
   }
   if (maxX < 0) return null;
+  // Trop petit pour être un chiffre : une poussière ou un reflet (voir config.py).
+  if ((maxY - minY + 1) / h < minDigitHeightRatio) return null;
 
   final digit = GrayImage(w, h, kept).crop(minX, minY, maxX + 1, maxY + 1);
   final box = pyRound(digitBox * digitSize / 28);

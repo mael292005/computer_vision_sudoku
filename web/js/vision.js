@@ -17,6 +17,7 @@ export const CONFIG = Object.freeze({
   digitSize: 28,
   digitBox: 20,
   minContrast: 60,
+  minDigitHeightRatio: 0.2,
   minGridAreaRatio: 0.01,
   maxAspectError: 0.2,
 });
@@ -212,6 +213,8 @@ export function extractDigit(cv, cell) {
   }
   free(binary, labels, stats, centroids);
   if (maxX < 0) return null;
+  // Trop petit pour être un chiffre : une poussière ou un reflet (voir config.py).
+  if ((maxY - minY + 1) / height < CONFIG.minDigitHeightRatio) return null;
 
   const cropW = maxX - minX + 1;
   const cropH = maxY - minY + 1;
