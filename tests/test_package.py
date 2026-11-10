@@ -25,6 +25,19 @@ def test_cli_without_arguments_shows_help() -> None:
     assert "Usage" in result.stdout
 
 
+def test_cli_solve_prints_solution() -> None:
+    grid = "530070000600195000098000060800060003400803001700020006060000280000419005000080079"
+    result = runner.invoke(app, ["solve", "--grid", grid])
+    assert result.exit_code == 0
+    assert result.stdout.splitlines()[0] == "5 3 4 | 6 7 8 | 9 1 2"
+
+
+def test_cli_solve_reports_invalid_grid() -> None:
+    result = runner.invoke(app, ["solve", "--grid", "123"])
+    assert result.exit_code == 1
+    assert "Erreur" in result.output
+
+
 def test_grid_constants_are_consistent() -> None:
     assert BOX_SIZE * BOX_SIZE == GRID_SIZE
 

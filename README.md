@@ -6,6 +6,8 @@
 
 **Un bot de computer vision qui regarde l'écran, lit une grille de Sudoku sur un site web, la résout et la remplit tout seul.**
 
+Site cible : [sudoku.com](https://sudoku.com/).
+
 <!-- Le GIF de démo arrivera quand le pipeline complet fonctionnera :
 ![Démo](docs/images/demo.gif)
 -->
@@ -55,11 +57,27 @@ Dépendances optionnelles, à installer au fil des étapes :
 
 ## Utilisation
 
+Résoudre une grille donnée sous forme de texte (81 caractères, `0` ou `.` pour les cases vides) :
+
 ```bash
-sudoku-vision version
+sudoku-vision solve --grid "8..........36......7..9.2...5...7.......457.....1...3...1....68..85...1..9....4.."
 ```
 
-Les autres commandes (`solve --image`, `solve --screen`, `--debug`) arriveront avec le pipeline.
+```
+8 1 2 | 7 5 3 | 6 4 9
+9 4 3 | 6 8 2 | 1 7 5
+6 7 5 | 4 9 1 | 2 8 3
+------+-------+------
+1 5 4 | 2 3 7 | 8 9 6
+3 6 9 | 8 4 5 | 7 2 1
+2 8 7 | 1 6 9 | 5 3 4
+------+-------+------
+5 2 1 | 9 7 4 | 3 6 8
+4 3 8 | 5 2 6 | 9 1 7
+7 9 6 | 3 1 8 | 4 5 2
+```
+
+Les commandes `solve --image`, `solve --screen` et l'option `--debug` arriveront avec le pipeline de vision.
 
 ## Structure du projet
 
@@ -87,7 +105,7 @@ Chaque push relance les mêmes vérifications dans GitHub Actions, sur Python 3.
 
 - [x] Mise en place du projet : packaging, lint, typage, tests, CI
 - [ ] Jeu de test : captures de grilles avec les chiffres attendus
-- [ ] Solveur
+- [x] Solveur : backtracking + heuristique MRV et masques de bits
 - [ ] Détection de la grille et correction de perspective
 - [ ] Découpe des cases et détection des cases vides
 - [ ] Lecture des chiffres (comparaison CNN / Tesseract)
