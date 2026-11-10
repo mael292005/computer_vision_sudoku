@@ -38,6 +38,24 @@ Le bot est une chaîne de six étapes, chacune dans son propre module :
 
 Les étapes 2 à 4 sont la vraie computer vision : elles transforment des pixels bruts en une grille 9×9 d'entiers que le solveur sait traiter.
 
+### Les étapes de vision en images
+
+![Étapes de vision](docs/images/pipeline_vision.png)
+
+1. **Détection** : après un seuillage, on garde le plus grand contour à 4 coins presque carré. Le logo « WEB SUDOKU », plus petit, est écarté.
+2. **Seuillage adaptatif** : chaque pixel est comparé à son voisinage, ce qui isole les traits et les chiffres.
+3. **Redressement et découpe** : la grille est projetée en un carré de 450 px, puis découpée en 81 cases. Une case est pleine (en vert) si plus de 1 % de ses pixels sont sombres.
+
+## Jeu de test
+
+Quatre captures d'écran complètes de websudoku.com, une par niveau (Easy, Medium, Hard, Evil), sont dans `tests/data/`. Les chiffres attendus sont notés dans `tests/data/grids.json`. Chaque grille annotée a exactement une solution, ce qui confirme que la recopie est juste.
+
+| Étape | Résultat sur le jeu de test |
+| --- | --- |
+| Détection de la grille | 4 / 4 grilles trouvées |
+| Cases vides ou pleines | 324 / 324 cases correctes |
+| Lecture des chiffres | à venir |
+
 ## Installation
 
 ```bash
@@ -87,6 +105,7 @@ tests/               # tests unitaires et d'intégration, images de test dans te
 training/            # scripts d'entraînement du modèle de chiffres
 models/              # poids du modèle entraîné
 notebooks/           # exploration visuelle de chaque étape
+scripts/             # génération des figures du README
 docs/images/         # figures et GIF de démo utilisés dans ce README
 ```
 
@@ -104,10 +123,10 @@ Chaque push relance les mêmes vérifications dans GitHub Actions, sur Python 3.
 ## Feuille de route
 
 - [x] Mise en place du projet : packaging, lint, typage, tests, CI
-- [ ] Jeu de test : captures de grilles avec les chiffres attendus
+- [x] Jeu de test : 4 captures (Easy à Evil) avec les chiffres attendus
 - [x] Solveur : backtracking + heuristique MRV et masques de bits
-- [ ] Détection de la grille et correction de perspective
-- [ ] Découpe des cases et détection des cases vides
+- [x] Détection de la grille et correction de perspective
+- [x] Découpe des cases et détection des cases vides
 - [ ] Lecture des chiffres (comparaison CNN / Tesseract)
 - [ ] Capture d'écran et saisie automatique
 - [ ] CLI complète avec sortie `--debug`

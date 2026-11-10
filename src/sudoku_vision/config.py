@@ -26,8 +26,12 @@ class VisionConfig:
     cell_margin_ratio: float = 0.12
     """Part de chaque case rognée sur chaque bord pour retirer les lignes de la grille."""
 
-    empty_cell_ink_ratio: float = 0.03
-    """Sous cette proportion de pixels « encre », la case est considérée vide."""
+    empty_cell_ink_ratio: float = 0.01
+    """Sous cette proportion de pixels « encre », la case est considérée vide.
+
+    Mesuré sur websudoku.com : 0 % pour une case vide, au moins 3,7 % pour un
+    chiffre (le « 1 », le plus fin). Le seuil est placé loin des deux.
+    """
 
     digit_size: int = 28
     """Côté, en pixels, de l'image de chiffre donnée au classifieur (format MNIST)."""
