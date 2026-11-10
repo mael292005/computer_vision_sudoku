@@ -44,7 +44,7 @@ Uint8List inkMask(GrayImage cell) {
   return mask;
 }
 
-bool isEmpty(GrayImage cell) {
+bool isEmptyCell(GrayImage cell) {
   final mask = inkMask(cell);
   if (mask.isEmpty) return true;
   var ink = 0;

@@ -50,7 +50,7 @@ void main() {
   test('une case vide ne donne aucun chiffre', () {
     final cell = GrayImage(38, 38, Uint8List(38 * 38)..fillRange(0, 38 * 38, 255));
     expect(extractDigit(cell), isNull);
-    expect(isEmpty(cell), isTrue);
+    expect(isEmptyCell(cell), isTrue);
   });
 
   test('pyRound arrondit les ,5 vers le pair, comme Python', () {

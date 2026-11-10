@@ -6,7 +6,7 @@
 
 **Un bot de computer vision qui regarde l'écran, lit une grille de Sudoku sur [websudoku.com](https://www.websudoku.com/), la résout et la remplit tout seul.**
 
-Il est aussi livré avec **un site web local** : on y dépose une capture de grille, ou on la tape, et la solution s'affiche aussitôt. Toute la vision tourne dans le navigateur.
+Il est aussi livré avec **un site web local** (déposer une capture de grille, ou la taper) et **une application Android** qui lit une grille de papier prise en photo.
 
 <!-- Démo : enregistrer une partie avec `sudoku-vision play` et placer le GIF ici :
 ![Démo](docs/images/demo.gif)
@@ -116,6 +116,28 @@ npm install
 npm test          # solveur + parité avec la version Python
 ```
 
+## L'application mobile
+
+Les Sudoku se font surtout sur papier, dans un journal ou un livre de grilles. Pour ces joueurs, faire une capture d'écran n'a pas de sens : l'application **Sudoku Photo** (Flutter, Android) part d'une simple **photo de la grille**.
+
+- On prend la grille en photo, ou on choisit une photo existante.
+- La grille lue s'affiche : les chiffres lus avec peu de certitude sont en orange, et on corrige un chiffre en touchant sa case.
+- **Un indice** révèle une seule case, pour aider sans gâcher la partie. **Voir la solution** affiche tout.
+- L'interface est pensée pour un public âgé : gros boutons, grands caractères, messages qui disent quoi faire.
+
+**Tout le pipeline est réécrit en Dart pur, sans OpenCV**, pour ne dépendre d'aucune bibliothèque native : flou gaussien, seuillage adaptatif, composantes connexes, homographie, extraction des chiffres, et le CNN lui-même. Ses poids sont exportés depuis le modèle ONNX par `training/export_mobile_weights.py`.
+
+Une photo pose des problèmes qu'une capture d'écran n'a pas : grille inclinée, vue de biais, ombre, bord de la feuille. La détection a donc été adaptée. On garde la plus grande forme d'un seul tenant dont les quatre coins forment un quadrilatère aux côtés proches, **et qui possède des lignes internes à 1/3 et 2/3** : un bord de feuille ou d'écran n'en a pas. Sur 44 fausses photos générées à partir du jeu de test (inclinaison jusqu'à 25°, perspective, éclairage inégal, bruit, flou), les 1 352 chiffres sont lus correctement.
+
+Les tests Dart vérifient que le CNN donne les mêmes sorties que le modèle ONNX et que le pipeline lit les 11 captures du jeu de test comme la version Python. L'APK est construit par GitHub Actions (workflow « Application mobile », artefact `sudoku-photo-apk`).
+
+```bash
+cd mobile
+flutter create --platforms=android --org fr.mael --project-name sudoku_photo .   # une seule fois
+flutter test
+flutter run
+```
+
 ## Installation
 
 ```bash
@@ -192,6 +214,7 @@ src/sudoku_vision/
 training/           # construction des modèles
 tests/              # tests unitaires et d'intégration, captures dans tests/data/
 web/                # le site : solveur et vision en JavaScript, tests de parité
+mobile/             # l'application Flutter : pipeline en Dart pur, interface
 scripts/            # génération des figures du README
 docs/images/        # figures du README
 ```
