@@ -6,7 +6,7 @@
 
 **Un bot de computer vision qui regarde l'écran, lit une grille de Sudoku sur un site web, la résout et la remplit tout seul.**
 
-Site cible : [sudoku.com](https://sudoku.com/).
+Site cible : [websudoku.com](https://www.websudoku.com/).
 
 <!-- Le GIF de démo arrivera quand le pipeline complet fonctionnera :
 ![Démo](docs/images/demo.gif)
