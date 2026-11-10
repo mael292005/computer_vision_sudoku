@@ -66,3 +66,28 @@ jobs:
           name: sudoku-photo-apk
           path: mobile/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
+
+  release:
+    name: Publication de l'APK (Release GitHub)
+    needs: apk
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: sudoku-photo-apk
+
+      - name: Renommage
+        run: mv app-release.apk SudokuPhoto.apk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-${{ github.run_number }}
+          name: Sudoku Photo pour Android (build ${{ github.run_number }})
+          make_latest: true
+          files: SudokuPhoto.apk
+          body: |
+            Application Android : prenez une grille de Sudoku en photo, l'application la lit et vous aide à la terminer.
+
+            Installation : téléchargez SudokuPhoto.apk depuis le téléphone, ouvrez-le et autorisez l'installation d'applications inconnues.
