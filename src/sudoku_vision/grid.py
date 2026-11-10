@@ -23,7 +23,7 @@ import cv2
 import numpy as np
 import numpy.typing as npt
 
-from sudoku_vision.config import DEFAULT_VISION, VisionConfig
+from sudoku_vision.config import DEFAULT_VISION, GRID_SIZE, VisionConfig
 
 Image = npt.NDArray[np.uint8]
 Corners = npt.NDArray[np.float32]
@@ -148,6 +148,25 @@ def warp_grid(image: Image, corners: Corners, size: int) -> Image:
     matrix = cv2.getPerspectiveTransform(corners, target)
     warped = cv2.warpPerspective(image, matrix, (size, size))
     return np.asarray(warped, dtype=np.uint8)
+
+
+def cell_centers(corners: Corners) -> npt.NDArray[np.float32]:
+    """Position, dans l'image d'origine, du centre de chacune des 81 cases.
+
+    On place les centres dans un carré unité (vue redressée), puis on applique
+    la transformation de perspective inverse pour revenir dans l'image. Ça
+    reste juste même si la grille est vue de biais.
+
+    Returns:
+        Tableau (9, 9, 2) de coordonnées (x, y), indexé par [ligne, colonne].
+    """
+    unit = np.array([[0, 0], [1, 0], [1, 1], [0, 1]], dtype=np.float32)
+    matrix = cv2.getPerspectiveTransform(unit, corners)
+    steps = (np.arange(GRID_SIZE, dtype=np.float32) + 0.5) / GRID_SIZE
+    xs, ys = np.meshgrid(steps, steps)
+    points = np.stack([xs, ys], axis=-1).reshape(-1, 1, 2)
+    mapped = cv2.perspectiveTransform(points, matrix)
+    return np.asarray(mapped.reshape(GRID_SIZE, GRID_SIZE, 2), dtype=np.float32)
 
 
 def detect_grid(image: Image, config: VisionConfig = DEFAULT_VISION) -> GridDetection:

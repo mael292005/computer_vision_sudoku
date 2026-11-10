@@ -25,11 +25,10 @@ dependencies = [
 [project.optional-dependencies]
 # Capture d'écran et contrôle souris/clavier (nécessite une session graphique).
 screen = ["mss>=9.0", "pyautogui>=0.9.54"]
-# Modèle de reconnaissance des chiffres (entraînement et inférence).
-ml = ["torch>=2.2", "torchvision>=0.17"]
-# Référence Tesseract, pour comparer avec le CNN.
-ocr = ["pytesseract>=0.3.10"]
+# Réentraînement du CNN uniquement : l'inférence passe par OpenCV, sans PyTorch.
+ml = ["torch>=2.2", "onnx>=1.16", "pillow>=10.0"]
 dev = [
+    "pillow>=10.0",
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "ruff>=0.6",
@@ -63,6 +62,8 @@ select = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]
+# Typer déclare les options via des appels dans les valeurs par défaut.
+"src/sudoku_vision/cli.py" = ["B008"]
 
 # --- Mypy : typage statique ----------------------------------------------------
 [tool.mypy]
@@ -72,7 +73,7 @@ mypy_path = "src"
 packages = ["sudoku_vision"]
 
 [[tool.mypy.overrides]]
-module = ["cv2.*", "mss.*", "pyautogui.*", "pytesseract.*"]
+module = ["cv2.*", "mss.*", "pyautogui.*", "torch.*", "PIL.*"]
 ignore_missing_imports = true
 
 # --- Pytest -------------------------------------------------------------------

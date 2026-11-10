@@ -6,6 +6,8 @@ et à illustrer le README.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import cv2
 import numpy as np
 import numpy.typing as npt
@@ -39,6 +41,26 @@ def draw_filled_mask(warped: Image, mask: npt.NDArray[np.bool_]) -> Image:
             cv2.rectangle(overlay, p0, p1, GREEN if mask[r, c] else RED, thickness=-1)
     blended = cv2.addWeighted(overlay, 0.25, out, 0.75, 0)
     return np.asarray(blended, dtype=np.uint8)
+
+
+def draw_solution(
+    warped: Image,
+    puzzle: Sequence[Sequence[int]],
+    solution: Sequence[Sequence[int]],
+) -> Image:
+    """Écrit en vert, sur la grille redressée, les chiffres trouvés par le solveur."""
+    out = cv2.cvtColor(warped, cv2.COLOR_GRAY2BGR) if warped.ndim == 2 else warped.copy()
+    step = out.shape[0] / GRID_SIZE
+    scale = step / 40
+    for r in range(GRID_SIZE):
+        for c in range(GRID_SIZE):
+            if puzzle[r][c] == 0:
+                text = str(solution[r][c])
+                (w, h), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, 2)
+                x = int(c * step + (step - w) / 2)
+                y = int(r * step + (step + h) / 2)
+                cv2.putText(out, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, scale, GREEN, 2)
+    return np.asarray(out, dtype=np.uint8)
 
 
 def crop_around(image: Image, corners: Corners, padding: int = 60) -> Image:

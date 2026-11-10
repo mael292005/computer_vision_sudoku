@@ -4,9 +4,10 @@ Une fois la grille redressée en carré, chaque case occupe exactement
 ``taille / 9`` pixels de côté. On rogne une marge sur chaque bord pour
 retirer les lignes de la grille, qui fausseraient la suite.
 
-Pour savoir si une case est vide, on compte la proportion de pixels sombres
-(« encre ») : une case vide est presque entièrement claire, une case avec un
-chiffre en contient nettement plus.
+Pour savoir si une case est vide, on compte la proportion de pixels « encre ».
+Le seuil qui sépare l'encre du fond est calculé pour chaque case, à mi-chemin
+entre son pixel le plus sombre et son pixel le plus clair : un chiffre flou ou
+gris clair reste ainsi détecté. Une case sans contraste est vide d'office.
 """
 
 from __future__ import annotations
@@ -17,8 +18,23 @@ import numpy.typing as npt
 from sudoku_vision.config import DEFAULT_VISION, GRID_SIZE, VisionConfig
 from sudoku_vision.grid import Image, to_gray
 
-INK_LEVEL = 128
-"""En dessous de ce niveau de gris (0 = noir, 255 = blanc), un pixel est de l'encre."""
+MIN_CONTRAST = 60
+"""Écart minimal entre le pixel le plus sombre et le plus clair pour qu'il y ait de l'encre."""
+
+
+def ink_mask(cell: Image) -> npt.NDArray[np.bool_]:
+    """Masque des pixels « encre » d'une case, avec un seuil propre à la case.
+
+    Le seuil est placé à mi-chemin entre le pixel le plus sombre et le plus
+    clair. Si la case n'a presque pas de contraste, elle n'a pas d'encre.
+    """
+    gray = to_gray(cell)
+    if gray.size == 0:
+        return np.zeros(gray.shape, dtype=bool)
+    darkest, lightest = int(np.min(gray)), int(np.max(gray))
+    if lightest - darkest < MIN_CONTRAST:
+        return np.zeros(gray.shape, dtype=bool)
+    return np.asarray(gray < (darkest + lightest) / 2, dtype=bool)
 
 
 def split_cells(warped: Image, config: VisionConfig = DEFAULT_VISION) -> list[list[Image]]:
@@ -52,7 +68,7 @@ def ink_ratio(cell: Image) -> float:
     """Proportion de pixels « encre » dans une case (entre 0 et 1)."""
     if cell.size == 0:
         return 0.0
-    return float(np.count_nonzero(to_gray(cell) < INK_LEVEL)) / cell.size
+    return float(np.count_nonzero(ink_mask(cell))) / cell.size
 
 
 def is_empty(cell: Image, config: VisionConfig = DEFAULT_VISION) -> bool:

@@ -33,7 +33,7 @@ debug/
 outputs/
 # Les données d'entraînement sont générées, pas versionnées.
 training/data/
-# Gros checkpoints : seul le petit modèle final dans models/ est versionné.
+# Checkpoints d'entraînement : seul le modèle final exporté (assets/) est versionné.
 *.ckpt
-models/*.pt
-!models/digits_cnn.pt
+*.pt
+*.pth
