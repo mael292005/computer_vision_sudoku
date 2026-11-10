@@ -28,16 +28,23 @@ class Annotated:
     path: Path
     name: str
     grid: Grid
+    site: str = ""
 
 
-def load_annotations(directory: Path) -> list[Annotated]:
-    """Lit ``grids.json`` dans ``directory``."""
+def load_annotations(directory: Path, site: str | None = None) -> list[Annotated]:
+    """Lit ``grids.json`` dans ``directory``, en ne gardant qu'un site si ``site`` est donné."""
     raw = json.loads((directory / "grids.json").read_text(encoding="utf-8"))
-    return [
-        Annotated(directory / name, entry.get("level", name), parse_grid("".join(entry["grid"])))
+    samples = [
+        Annotated(
+            directory / name,
+            entry.get("level", name),
+            parse_grid("".join(entry["grid"])),
+            entry.get("site", ""),
+        )
         for name, entry in raw.items()
         if not name.startswith("_")
     ]
+    return [s for s in samples if site is None or s.site == site]
 
 
 def degrade(image: Image, scale: float = 1.0, blur: float = 0.0) -> Image:

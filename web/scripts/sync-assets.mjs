@@ -17,6 +17,8 @@ const files = [
   ["tests/data/websudoku_medium.png", "examples/medium.png"],
   ["tests/data/websudoku_hard.png", "examples/hard.png"],
   ["tests/data/websudoku_evil.png", "examples/evil.png"],
+  ["tests/data/sudokucom_master.png", "examples/sudokucom.png"],
+  ["tests/data/onlinesudoku_easy.png", "examples/onlinesudoku.png"],
 ];
 for (const [from, to] of files) {
   copyFileSync(join(root, from), join(out, to));

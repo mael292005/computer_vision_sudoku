@@ -65,9 +65,11 @@ def test_cli_solve_image_reports_missing_file() -> None:
 
 
 def test_cli_benchmark_prints_report() -> None:
-    result = runner.invoke(app, ["benchmark", "--data", str(DATA_DIR), "--model", "template"])
+    args = ["benchmark", "--data", str(DATA_DIR), "-m", "template", "--site", "websudoku.com"]
+    result = runner.invoke(app, args)
     assert result.exit_code == 0, result.output
     assert "Chiffres lus         : 115/115" in result.stdout
+    assert "websudoku.com" in result.stdout
 
 
 def test_cli_benchmark_accepts_degradation_options() -> None:

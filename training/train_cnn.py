@@ -1,8 +1,9 @@
 """Entraîne le CNN de reconnaissance des chiffres et l'exporte en ONNX.
 
-Le modèle n'est entraîné que sur des chiffres synthétiques (plusieurs polices,
-déformations aléatoires) : les captures de websudoku.com ne servent qu'à
-l'évaluation finale.
+Le modèle n'est entraîné que sur des chiffres synthétiques : une cinquantaine
+de polices (celles du système et les polices web de training/fonts.py), en
+graisses variées, avec des déformations aléatoires. Les captures de tests/data
+ne servent qu'à l'évaluation finale.
 
 Usage :
     pip install -e ".[ml]"
@@ -16,6 +17,7 @@ import time
 
 import numpy as np
 import torch
+from fonts import download_fonts
 from torch import nn
 
 from sudoku_vision.digits import CNN_PATH
@@ -59,13 +61,13 @@ def accuracy(model: nn.Module, x: torch.Tensor, y: torch.Tensor) -> float:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--per-digit", type=int, default=1500, help="exemples par chiffre")
-    parser.add_argument("--epochs", type=int, default=8)
+    parser.add_argument("--per-digit", type=int, default=3000, help="exemples par chiffre")
+    parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
-    fonts = available_fonts()
+    fonts = available_fonts() + download_fonts()
     print(f"{len(fonts)} polices : {', '.join(f.stem for f in fonts)}")
 
     start = time.perf_counter()

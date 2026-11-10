@@ -81,6 +81,23 @@ class RenderParams:
     """Écart-type du flou gaussien (0 = net)."""
     noise: float = 0.0
     """Écart-type du bruit gaussien, en niveaux de gris."""
+    weight: int = 400
+    """Graisse du trait (100 = très fin, 900 = très gras), pour les polices variables."""
+
+
+def set_weight(font: object, weight: int) -> None:
+    """Règle la graisse d'une police variable ; sans effet sur une police statique."""
+    try:
+        axes = font.get_variation_axes()  # type: ignore[attr-defined]
+    except OSError:
+        return  # police statique : une seule graisse
+    values = [
+        min(max(weight, axis["minimum"]), axis["maximum"])
+        if axis["name"] in (b"Weight", "Weight")
+        else axis["default"]
+        for axis in axes
+    ]
+    font.set_variation_by_axes(values)  # type: ignore[attr-defined]
 
 
 def render_cell(params: RenderParams) -> Image:
@@ -91,6 +108,7 @@ def render_cell(params: RenderParams) -> Image:
     canvas = PilImage.new("L", (CELL_SIZE, CELL_SIZE), 255)
     draw = ImageDraw.Draw(canvas)
     font = ImageFont.truetype(str(params.font), round(CELL_SIZE * params.size_ratio))
+    set_weight(font, params.weight)
     text = str(params.digit)
     left, top, right, bottom = draw.textbbox((0, 0), text, font=font)
     x = (CELL_SIZE - (right - left)) / 2 - left + params.dx * CELL_SIZE
@@ -128,6 +146,7 @@ def random_params(rng: np.random.Generator, fonts: Sequence[Path], digit: int) -
         thickness=int(rng.choice([-1, 0, 0, 0, 1])),
         blur=float(rng.choice([0.0, 0.0, 0.5])),
         noise=float(rng.choice([0.0, 0.0, 5.0, 10.0])),
+        weight=int(rng.integers(250, 701)),
     )
 
 

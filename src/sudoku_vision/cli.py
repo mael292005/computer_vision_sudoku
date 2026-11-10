@@ -145,15 +145,18 @@ def benchmark(
         1.0, "--scale", help="Réduit les images (0.5 = moitié) pour tester la robustesse."
     ),
     blur: float = typer.Option(0.0, "--blur", help="Ajoute un flou gaussien (en pixels)."),
+    site: str | None = typer.Option(None, "--site", help="N'évalue que les captures d'un site."),
 ) -> None:
     """Mesure la précision de chaque étape sur un jeu de test annoté."""
     from sudoku_vision.digits import load_classifier
     from sudoku_vision.evaluate import evaluate, load_annotations
 
     try:
-        samples = load_annotations(data)
+        samples = load_annotations(data, site)
     except FileNotFoundError as error:
         _fail(str(error))
+    sites = sorted({sample.site for sample in samples if sample.site})
+    typer.echo(f"{len(samples)} captures ({', '.join(sites) or 'site non précisé'})\n")
     for index, name in enumerate(model):
         if index:
             typer.echo("")

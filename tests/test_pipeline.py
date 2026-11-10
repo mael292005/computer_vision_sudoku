@@ -7,7 +7,7 @@ import pytest
 
 from sudoku_vision.actuator import fill_grid
 from sudoku_vision.capture import ScreenShot
-from sudoku_vision.digits import Prediction, TemplateClassifier
+from sudoku_vision.digits import CnnClassifier, Prediction
 from sudoku_vision.evaluate import degrade, evaluate, load_annotations
 from sudoku_vision.grid import cell_centers, load_image
 from sudoku_vision.pipeline import ReadingError, run, save_debug
@@ -38,7 +38,7 @@ class AlwaysOne:
 
 
 def test_pipeline_solves_every_screenshot(sample: Sample) -> None:
-    result = run(load_image(sample.path), TemplateClassifier.load())
+    result = run(load_image(sample.path), CnnClassifier())
     assert result.puzzle == sample.grid
     assert result.solution == solve(sample.grid)
     assert set(result.timings) == {"grille", "cases", "chiffres", "solveur"}
@@ -51,7 +51,7 @@ def test_misread_digits_raise_reading_error(sample: Sample) -> None:
 
 def test_save_debug_writes_four_images(sample: Sample, tmp_path: Path) -> None:
     image = load_image(sample.path)
-    written = save_debug(run(image, TemplateClassifier.load()), image, tmp_path)
+    written = save_debug(run(image, CnnClassifier()), image, tmp_path)
     assert len(written) == 4
     assert all(path.is_file() and path.stat().st_size > 0 for path in written)
 
@@ -77,7 +77,7 @@ def test_fill_grid_clicks_only_empty_cells(sample: Sample) -> None:
 
 
 def test_fill_grid_types_the_solution_at_the_right_place(sample: Sample) -> None:
-    result = run(load_image(sample.path), TemplateClassifier.load())
+    result = run(load_image(sample.path), CnnClassifier())
     controller = FakeController()
     fill_grid(result.puzzle, result.solution, result.centers, controller)
     _, (x, y) = controller.actions[0]
@@ -99,9 +99,10 @@ def test_screenshot_converts_to_mouse_coordinates() -> None:
 
 
 def test_evaluate_reports_perfect_scores() -> None:
-    report = evaluate(load_annotations(DATA_DIR), TemplateClassifier.load())
-    assert report.images == report.grids_found == report.solved == 4
-    assert report.cells_correct == report.cells_total == 324
+    samples = load_annotations(DATA_DIR)
+    report = evaluate(samples, CnnClassifier())
+    assert report.images == report.grids_found == report.solved == len(samples)
+    assert report.cells_correct == report.cells_total == 81 * len(samples)
     assert report.digit_accuracy == 1.0
     assert report.mean_ms > 0
     assert len(report.lines()) == 6
@@ -122,6 +123,14 @@ def test_evaluate_counts_misses(tmp_path: Path) -> None:
     assert report.mean_ms == 0.0
 
 
+def test_load_annotations_can_filter_by_site() -> None:
+    every = load_annotations(DATA_DIR)
+    websudoku = load_annotations(DATA_DIR, site="websudoku.com")
+    assert 0 < len(websudoku) < len(every)
+    assert {sample.site for sample in websudoku} == {"websudoku.com"}
+    assert load_annotations(DATA_DIR, site="inconnu") == []
+
+
 def test_degrade_resizes_and_blurs() -> None:
     image = np.zeros((100, 200, 3), dtype=np.uint8)
     image[40:60, 90:110] = 255
@@ -135,9 +144,8 @@ def test_degrade_resizes_and_blurs() -> None:
 
 def test_cnn_survives_strong_degradation() -> None:
     """Le CNN reste fiable sur une grille 4 fois plus petite et floue."""
-    from sudoku_vision.digits import CnnClassifier
-
-    report = evaluate(load_annotations(DATA_DIR), CnnClassifier(), scale=0.25, blur=1.0)
+    websudoku = load_annotations(DATA_DIR, site="websudoku.com")
+    report = evaluate(websudoku, CnnClassifier(), scale=0.25, blur=1.0)
     assert report.degraded
     assert "échelle 0.25" in report.lines()[0]
     assert report.digit_accuracy == 1.0

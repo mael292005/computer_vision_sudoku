@@ -46,7 +46,7 @@ test("orderCorners range les coins dans le bon ordre", () => {
 });
 
 for (const sample of samples) {
-  test(`lit la capture ${sample.level} comme la version Python`, async () => {
+  test(`lit ${sample.name} comme la version Python`, async () => {
     const rgba = readPng(cv, sample.path);
     try {
       const result = await readGrid(cv, ort, session, rgba);

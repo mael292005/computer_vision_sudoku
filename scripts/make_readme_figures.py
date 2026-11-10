@@ -6,6 +6,7 @@ Usage :
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import cv2
@@ -88,7 +89,10 @@ def digits_comparison() -> None:
                     if digit is not None:
                         real[value] = digit
 
-    x, y = make_dataset(3, available_fonts(), seed=7)
+    sys.path.insert(0, str(ROOT / "training"))
+    from fonts import download_fonts
+
+    x, y = make_dataset(3, available_fonts() + download_fonts(), seed=7)
     synthetic = [x[int(np.flatnonzero(y == d)[2])] for d in range(9)]
 
     rows = [

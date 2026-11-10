@@ -37,3 +37,4 @@ training/data/
 *.ckpt
 *.pt
 *.pth
+training/fonts/

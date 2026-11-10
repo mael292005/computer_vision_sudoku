@@ -45,10 +45,19 @@ def test_extract_digit_is_centered_mnist_format() -> None:
     assert max(np.ptp(xs), np.ptp(ys)) + 1 <= 20
 
 
-@pytest.mark.parametrize("name", CLASSIFIERS)
-def test_classifier_reads_every_screenshot(name: str, sample: Sample) -> None:
+def test_cnn_reads_every_screenshot(sample: Sample) -> None:
+    """Le CNN, entraîné sur des polices et jamais sur ces captures, lit tous les sites."""
     cells = split_cells(detect_grid(load_image(sample.path)).warped)
-    reading = read_digits(cells, load_classifier(name))
+    reading = read_digits(cells, CnnClassifier())
+    assert reading.grid == sample.grid
+
+
+def test_template_matching_reads_websudoku(sample: Sample) -> None:
+    """Le template matching ne connaît qu'une police : il est fiable sur websudoku.com seulement."""
+    if sample.site != "websudoku.com":
+        pytest.skip("le template matching dépend de la police du site")
+    cells = split_cells(detect_grid(load_image(sample.path)).warped)
+    reading = read_digits(cells, TemplateClassifier.load())
     assert reading.grid == sample.grid
 
 
@@ -59,7 +68,7 @@ def test_classifier_handles_empty_batch(name: str) -> None:
 
 def test_confidence_is_one_for_empty_cells(sample: Sample) -> None:
     cells = split_cells(detect_grid(load_image(sample.path)).warped)
-    reading = read_digits(cells, TemplateClassifier.load())
+    reading = read_digits(cells, CnnClassifier())
     empty = np.array(sample.grid) == 0
     assert np.all(reading.confidence[empty] == 1.0)
     assert np.all((reading.confidence > 0) & (reading.confidence <= 1))

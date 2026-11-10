@@ -16,28 +16,36 @@ Il est aussi livré avec **un site web local** : on y dépose une capture de gri
 
 ## Résultats
 
-Mesurés sur 4 captures d'écran complètes (niveaux Easy, Medium, Hard et Evil) avec `sudoku-vision benchmark`. Aucune de ces captures n'a servi à construire les modèles.
+Mesurés avec `sudoku-vision benchmark` sur 11 captures d'écran complètes de **3 sites différents**, chacun avec sa propre police et ses propres couleurs. Aucune de ces captures n'a servi à construire les modèles : elles ne servent qu'à l'évaluation.
 
 | Étape | Résultat |
 | --- | --- |
-| Détection de la grille | 4 / 4 grilles |
-| Cases vides ou pleines | 324 / 324 cases |
-| Lecture des chiffres (CNN et template matching) | 115 / 115 chiffres |
-| Grilles résolues de bout en bout | 4 / 4 |
+| Détection de la grille | 11 / 11 grilles |
+| Cases vides ou pleines | 891 / 891 cases |
+| Lecture des chiffres (CNN) | 338 / 338 chiffres |
+| Grilles résolues de bout en bout | 11 / 11 |
 | Temps total, de l'image à la solution | environ 40 ms |
 
-**Robustesse.** Les deux méthodes de lecture font 100 % sur les captures d'origine. Pour les départager, on dégrade les captures : on les réduit (comme un navigateur moins zoomé) et on les floute (`sudoku-vision benchmark --scale 0.25 --blur 1`).
+**Généraliser à d'autres sites.** Le projet a d'abord été construit sur websudoku.com, dont la police est une Times. Testé ensuite sur sudoku.com et Online Sudoku, qui utilisent des polices sans empattements, le premier CNN confondait presque tous les « 1 » avec des « 4 » et les « 3 » avec des « 5 ». Plutôt que d'entraîner sur ces captures, ce qui aurait faussé l'évaluation, les données synthétiques ont été élargies de 12 à 50 polices web courantes, en graisses variées. Les captures sont restées un test que le modèle n'a jamais vu.
 
-| Conditions | Template matching | CNN |
+| Site (police) | Template matching | CNN v1 (12 polices) | CNN v2 (50 polices) |
+| --- | --- | --- | --- |
+| websudoku.com (Times) | 115 / 115 | 115 / 115 | **115 / 115** |
+| sudoku.com, 6 niveaux (sans empattements) | 156 / 187 | 168 / 187 | **187 / 187** |
+| Online Sudoku (sans empattements) | 28 / 36 | 31 / 36 | **36 / 36** |
+
+**Robustesse.** On dégrade aussi les captures de websudoku.com : on les réduit (comme un navigateur moins zoomé) et on les floute (`sudoku-vision benchmark --site websudoku.com --scale 0.25 --blur 1`).
+
+| Conditions | Template matching | CNN v2 |
 | --- | --- | --- |
 | Capture d'origine (grille de 776 px) | 115 / 115 | 115 / 115 |
 | Réduite à 50 % + flou de 1,5 px | 115 / 115 | 115 / 115 |
 | Réduite à 35 % + flou de 1 px | 113 / 115 | **115 / 115** |
 | Réduite à 35 % + flou de 1,5 px | 94 / 115 | **115 / 115** |
 | Réduite à 25 % + flou de 1 px (grille de 194 px) | 91 / 115 | **115 / 115** |
-| Réduite à 25 % + flou de 1,5 px | 57 / 115 | 76 / 115 |
+| Réduite à 25 % + flou de 1,5 px | 57 / 115 | 91 / 115 |
 
-Le CNN, entraîné sur des chiffres variés, résiste bien mieux aux images dégradées : c'est le classifieur utilisé par défaut. Le template matching reste une bonne référence, simple et sans entraînement.
+Le CNN est le classifieur utilisé par défaut. Le template matching reste une référence utile, simple et sans entraînement, mais il ne connaît qu'une police.
 
 ## Fonctionnement
 
@@ -78,7 +86,7 @@ Chaque chiffre est d'abord isolé et normalisé au **format MNIST** : 28×28 pix
 ![Chiffres](docs/images/digits.png)
 
 - **Template matching** : on compare le chiffre à un modèle de chaque chiffre de 1 à 9, rendu avec la police Liberation Serif (équivalente à Times, la police du site). On garde le modèle avec la meilleure corrélation normalisée. Pas d'entraînement, mais l'approche dépend de la police.
-- **CNN** : un petit réseau convolutif (2 couches de convolution, environ 55 000 paramètres) entraîné avec PyTorch sur des chiffres **synthétiques** : 12 polices différentes, avec des variations aléatoires de taille, position, rotation, épaisseur, flou et bruit. Il est exporté au format **ONNX** et exécuté par le module `cv2.dnn` d'OpenCV : **PyTorch n'est pas nécessaire pour utiliser le bot**, seulement pour réentraîner le modèle.
+- **CNN** : un petit réseau convolutif (2 couches de convolution, environ 55 000 paramètres) entraîné avec PyTorch sur des chiffres **synthétiques** : 50 polices (celles du système et des polices web courantes téléchargées depuis Google Fonts, voir `training/fonts.py`), en graisses variées, avec des variations aléatoires de taille, position, rotation, épaisseur, flou et bruit. Il est exporté au format **ONNX** et exécuté par le module `cv2.dnn` d'OpenCV : **PyTorch n'est pas nécessaire pour utiliser le bot**, seulement pour réentraîner le modèle.
 
 Aucun des deux n'a vu les captures de websudoku.com pendant sa construction : les résultats en haut de page sont une évaluation honnête, pas un score sur les données d'entraînement.
 
@@ -154,14 +162,14 @@ sudoku-vision benchmark
 
 ## Jeu de test
 
-`tests/data/` contient 4 captures d'écran complètes de websudoku.com, une par niveau, et `grids.json` avec les chiffres attendus. Chaque grille annotée a exactement une solution, ce qui confirme que la recopie est juste. Les tests vérifient chaque étape du pipeline sur ces 4 captures.
+`tests/data/` contient 11 captures d'écran complètes : 4 de websudoku.com (Easy à Evil), 6 de sudoku.com (Easy à Extreme) et 1 d'Online Sudoku. `grids.json` donne, pour chacune, le site et les chiffres attendus. Chaque grille annotée a exactement une solution, ce qui confirme que la recopie est juste. Les tests vérifient chaque étape du pipeline sur ces 11 captures, en Python comme en JavaScript.
 
 ## Réentraîner les modèles
 
 ```bash
 pip install -e ".[ml,dev]"
 python training/make_templates.py   # modèles du template matching
-python training/train_cnn.py        # CNN, exporté dans src/sudoku_vision/assets/
+python training/train_cnn.py        # CNN (télécharge les polices au premier lancement)
 python scripts/make_readme_figures.py
 ```
 
@@ -202,8 +210,8 @@ Chaque push relance ces vérifications dans GitHub Actions, sur Python 3.11 et 3
 
 ## Limites et pistes d'amélioration
 
-- **Un seul site** : les réglages (seuils, police des modèles) sont adaptés à websudoku.com. Le CNN, entraîné sur 12 polices, devrait mieux s'adapter à d'autres sites que le template matching.
-- **Petit jeu de test** : 4 grilles et 115 chiffres. Un jeu plus large donnerait des métriques plus solides.
+- **Trois sites testés** : le pipeline est validé sur websudoku.com, sudoku.com et Online Sudoku. Un site avec une police très inhabituelle (manuscrite, par exemple) demanderait d'élargir encore les données synthétiques.
+- **Jeu de test modeste** : 11 grilles et 338 chiffres. Un jeu plus large donnerait des métriques plus solides.
 - **Grille visible en entier** : la grille doit être entièrement affichée à l'écran au moment de la capture.
 
 **Prochaines étapes :** photo d'un Sudoku papier (perspective forte, éclairage variable), mode webcam en temps réel avec la solution affichée en réalité augmentée, chiffres manuscrits.
