@@ -28,6 +28,7 @@ screen = ["mss>=9.0", "pyautogui>=0.9.54"]
 # Réentraînement du CNN uniquement : l'inférence passe par OpenCV, sans PyTorch.
 ml = ["torch>=2.2", "onnx>=1.16", "pillow>=10.0"]
 dev = [
+    "onnx>=1.16",
     "pillow>=10.0",
     "pytest>=8.0",
     "pytest-cov>=5.0",

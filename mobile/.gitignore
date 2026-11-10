@@ -1,0 +1,15 @@
+# Fichiers générés par Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+*.iml
+.idea/
+
+# Dossiers de plateforme générés par `flutter create` (voir README)
+android/
+ios/
+linux/
+macos/
+web/
+windows/

@@ -1,0 +1,68 @@
+name: Application mobile
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mobile/**"
+      - "tests/data/**"
+      - ".github/workflows/mobile.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Analyse et tests Dart
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dépendances
+        run: flutter pub get
+
+      - name: Analyse statique
+        run: flutter analyze --no-fatal-infos
+
+      - name: Tests (solveur, CNN, lecture des 11 captures, interface)
+        run: flutter test
+
+  apk:
+    name: Construction de l'APK Android
+    needs: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Génération du projet Android
+        run: |
+          flutter create --platforms=android --org fr.mael --project-name sudoku_photo .
+          sed -i 's/android:label="sudoku_photo"/android:label="Sudoku Photo"/' android/app/src/main/AndroidManifest.xml
+
+      - name: Construction
+        run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sudoku-photo-apk
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
