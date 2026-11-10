@@ -162,5 +162,22 @@ def benchmark(
             typer.echo(line)
 
 
+@app.command()
+def web(
+    port: int = typer.Option(8000, "--port", "-p", help="Port du serveur local."),
+    browser: bool = typer.Option(
+        True, "--browser/--no-browser", help="Ouvrir le site dans le navigateur."
+    ),
+) -> None:  # pragma: no cover - lance un serveur qui tourne jusqu'à Ctrl+C
+    """Lance le site web en local : saisie de grille ou capture, solution instantanée."""
+    from sudoku_vision.webapp import WEB_DIR, prepare_site, serve
+
+    try:
+        prepare_site()
+    except FileNotFoundError as error:
+        _fail(str(error))
+    serve(WEB_DIR, port, open_browser=browser)
+
+
 if __name__ == "__main__":  # pragma: no cover
     app()

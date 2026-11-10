@@ -6,13 +6,13 @@
 
 **Un bot de computer vision qui regarde l'écran, lit une grille de Sudoku sur [websudoku.com](https://www.websudoku.com/), la résout et la remplit tout seul.**
 
-**[Essayer en ligne](https://mael292005.github.io/computer_vision_sudoku/)** : envoyez une capture de grille ou tapez-la, la solution s'affiche aussitôt. Tout tourne dans le navigateur.
+Il est aussi livré avec **un site web local** : on y dépose une capture de grille, ou on la tape, et la solution s'affiche aussitôt. Toute la vision tourne dans le navigateur.
 
 <!-- Démo : enregistrer une partie avec `sudoku-vision play` et placer le GIF ici :
 ![Démo](docs/images/demo.gif)
 -->
 
-[![Le site Sudoku Vision : une grille Evil lue depuis une capture et résolue](docs/images/site.png)](https://mael292005.github.io/computer_vision_sudoku/)
+![Le site Sudoku Vision : une grille Evil lue depuis une capture et résolue](docs/images/site.png)
 
 ## Résultats
 
@@ -90,19 +90,22 @@ Pour cliquer au bon endroit, la position de chaque case à l'écran est calculé
 
 ## Le site web
 
-[https://mael292005.github.io/computer_vision_sudoku/](https://mael292005.github.io/computer_vision_sudoku/)
+```bash
+sudoku-vision web
+```
 
-Le site reprend tout le pipeline, mais dans le navigateur : la détection de la grille passe par **OpenCV.js** et la lecture des chiffres par le **même CNN** (le fichier ONNX), exécuté par **ONNX Runtime Web**. Il n'y a aucun serveur : l'image ne quitte jamais l'ordinateur de l'utilisateur, et le site est hébergé gratuitement sur GitHub Pages.
+La commande prépare le site, le sert sur http://localhost:8000 et ouvre le navigateur (Ctrl+C pour l'arrêter). Une connexion internet est nécessaire au premier chargement pour récupérer OpenCV.js et ONNX Runtime.
+
+Le site reprend tout le pipeline, mais dans le navigateur : la détection de la grille passe par **OpenCV.js** et la lecture des chiffres par le **même CNN** (le fichier ONNX), exécuté par **ONNX Runtime Web**. Le serveur local ne fait que livrer les fichiers : aucun calcul n'est fait côté serveur et l'image ne quitte jamais le navigateur. Le site étant entièrement statique, il pourrait être hébergé tel quel sur n'importe quel hébergement de fichiers.
 
 On peut déposer une capture, la coller avec Ctrl+V, choisir un des exemples, ou taper la grille à la main. Les chiffres en conflit sont surlignés, et les chiffres lus avec peu de certitude sont soulignés pour être vérifiés.
 
-**Une seule logique, deux langages.** Le code JavaScript (`web/js/`) est un portage direct du code Python, avec les mêmes réglages, jusqu'à l'arrondi des ,5 vers le pair comme en Python. Des tests (`web/tests/`) font passer les 4 captures du jeu de test dans le pipeline JavaScript et vérifient qu'il lit exactement les mêmes 115 chiffres. Ces tests tournent dans la CI et avant chaque mise en ligne.
+**Une seule logique, deux langages.** Le code JavaScript (`web/js/`) est un portage direct du code Python, avec les mêmes réglages, jusqu'à l'arrondi des ,5 vers le pair comme en Python. Des tests (`web/tests/`) font passer les 4 captures du jeu de test dans le pipeline JavaScript et vérifient qu'il lit exactement les mêmes 115 chiffres. Ces tests tournent dans la CI à chaque push.
 
 ```bash
 cd web
 npm install
 npm test          # solveur + parité avec la version Python
-npm run serve     # site en local sur http://localhost:8000
 ```
 
 ## Installation
@@ -176,6 +179,7 @@ src/sudoku_vision/
 ├── pipeline.py     # enchaîne toutes les étapes, mode debug
 ├── evaluate.py     # métriques sur un jeu de test annoté
 ├── cli.py          # commandes sudoku-vision
+├── webapp.py       # lancement du site en local
 └── assets/         # modèles livrés avec le package
 training/           # construction des modèles
 tests/              # tests unitaires et d'intégration, captures dans tests/data/

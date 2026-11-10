@@ -5,8 +5,7 @@
   "description": "Site de Sudoku Vision : toute la vision tourne dans le navigateur.",
   "scripts": {
     "sync": "node scripts/sync-assets.mjs",
-    "test": "node --test tests/*.test.mjs",
-    "serve": "npm run sync && npx --yes http-server . -p 8000 -c-1"
+    "test": "node --test tests/*.test.mjs"
   },
   "devDependencies": {
     "@techstark/opencv-js": "^5.0.0-release.1",
