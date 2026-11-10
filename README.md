@@ -6,13 +6,13 @@
 
 **Un bot de computer vision qui regarde l'écran, lit une grille de Sudoku sur [websudoku.com](https://www.websudoku.com/), la résout et la remplit tout seul.**
 
+**[Essayer en ligne](https://mael292005.github.io/computer_vision_sudoku/)** : envoyez une capture de grille ou tapez-la, la solution s'affiche aussitôt. Tout tourne dans le navigateur.
+
 <!-- Démo : enregistrer une partie avec `sudoku-vision play` et placer le GIF ici :
 ![Démo](docs/images/demo.gif)
 -->
 
-<p align="center">
-  <img src="docs/images/solution.png" width="320" alt="Grille Evil résolue : les chiffres trouvés par le bot sont en vert">
-</p>
+[![Le site Sudoku Vision : une grille Evil lue depuis une capture et résolue](docs/images/site.png)](https://mael292005.github.io/computer_vision_sudoku/)
 
 ## Résultats
 
@@ -88,6 +88,23 @@ Le solveur remplit d'abord la case qui a le moins de candidats possibles (heuris
 
 Pour cliquer au bon endroit, la position de chaque case à l'écran est calculée avec la transformation de perspective inverse. Le rapport entre pixels de capture et pixels souris est mesuré, pour gérer les écrans mis à l'échelle (Windows à 125 % ou 150 %, Mac Retina).
 
+## Le site web
+
+[https://mael292005.github.io/computer_vision_sudoku/](https://mael292005.github.io/computer_vision_sudoku/)
+
+Le site reprend tout le pipeline, mais dans le navigateur : la détection de la grille passe par **OpenCV.js** et la lecture des chiffres par le **même CNN** (le fichier ONNX), exécuté par **ONNX Runtime Web**. Il n'y a aucun serveur : l'image ne quitte jamais l'ordinateur de l'utilisateur, et le site est hébergé gratuitement sur GitHub Pages.
+
+On peut déposer une capture, la coller avec Ctrl+V, choisir un des exemples, ou taper la grille à la main. Les chiffres en conflit sont surlignés, et les chiffres lus avec peu de certitude sont soulignés pour être vérifiés.
+
+**Une seule logique, deux langages.** Le code JavaScript (`web/js/`) est un portage direct du code Python, avec les mêmes réglages, jusqu'à l'arrondi des ,5 vers le pair comme en Python. Des tests (`web/tests/`) font passer les 4 captures du jeu de test dans le pipeline JavaScript et vérifient qu'il lit exactement les mêmes 115 chiffres. Ces tests tournent dans la CI et avant chaque mise en ligne.
+
+```bash
+cd web
+npm install
+npm test          # solveur + parité avec la version Python
+npm run serve     # site en local sur http://localhost:8000
+```
+
 ## Installation
 
 ```bash
@@ -162,6 +179,7 @@ src/sudoku_vision/
 └── assets/         # modèles livrés avec le package
 training/           # construction des modèles
 tests/              # tests unitaires et d'intégration, captures dans tests/data/
+web/                # le site : solveur et vision en JavaScript, tests de parité
 scripts/            # génération des figures du README
 docs/images/        # figures du README
 ```

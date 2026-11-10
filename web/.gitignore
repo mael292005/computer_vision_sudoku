@@ -1,0 +1,3 @@
+node_modules/
+# Copiés depuis le reste du dépôt par `npm run sync` (une seule source de vérité).
+assets/

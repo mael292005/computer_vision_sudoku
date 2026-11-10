@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sudoku Vision</title>
+    <meta
+      name="description"
+      content="Envoyez la capture d'une grille de Sudoku ou tapez-la : la solution s'affiche instantanément. Toute la vision par ordinateur tourne dans votre navigateur."
+    />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232445D4'/%3E%3Cpath d='M11 3v26M21 3v26M3 11h26M3 21h26' stroke='white' stroke-width='2'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <h1>Sudoku Vision</h1>
+      <p class="lede">
+        Envoyez la capture d'une grille ou tapez-la : la solution s'affiche aussitôt.
+        La vision par ordinateur tourne entièrement dans votre navigateur, l'image n'est envoyée nulle part.
+      </p>
+    </header>
+
+    <main class="layout">
+      <section class="board-area" aria-label="Grille">
+        <div class="board-frame">
+          <div id="board" class="board" role="grid" aria-label="Grille de Sudoku, 9 lignes de 9 cases"></div>
+          <div class="scan" aria-hidden="true"></div>
+        </div>
+        <p class="legend">
+          <span class="legend-item"><span class="legend-given">5</span> chiffre de départ</span>
+          <span class="legend-item"><span class="legend-found">5</span> chiffre trouvé par le solveur</span>
+        </p>
+        <div class="board-actions">
+          <button id="solve" class="button primary" type="button">Résoudre</button>
+          <button id="clear" class="button" type="button">Effacer la grille</button>
+        </div>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+      </section>
+
+      <aside class="panel" aria-label="Lire une grille depuis une image">
+        <h2>Depuis une image</h2>
+        <label id="dropzone" class="dropzone" for="file">
+          <input id="file" type="file" accept="image/*" />
+          <span class="dropzone-main">Déposez une capture d'écran ici</span>
+          <span class="dropzone-hint">ou cliquez pour choisir un fichier, ou collez une image avec Ctrl+V</span>
+        </label>
+
+        <div class="examples">
+          <p>Pas de capture sous la main ? Essayez une grille de websudoku.com :</p>
+          <div class="example-buttons">
+            <button class="button small" type="button" data-example="easy">Easy</button>
+            <button class="button small" type="button" data-example="medium">Medium</button>
+            <button class="button small" type="button" data-example="hard">Hard</button>
+            <button class="button small" type="button" data-example="evil">Evil</button>
+          </div>
+        </div>
+
+        <figure id="insight" class="insight" hidden>
+          <figcaption>Ce que voit l'algorithme</figcaption>
+          <div class="insight-images">
+            <canvas id="detected" aria-label="Capture avec la grille détectée entourée"></canvas>
+            <canvas id="warped" aria-label="Grille redressée, cases pleines repérées"></canvas>
+          </div>
+          <p id="insight-text" class="insight-text"></p>
+        </figure>
+
+        <p class="engine" id="engine">Préparation du moteur de vision…</p>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Détection de la grille avec OpenCV, lecture des chiffres par un petit réseau de neurones
+        entraîné sur des chiffres synthétiques, résolution par backtracking.
+        <a href="https://github.com/mael292005/computer_vision_sudoku">Le code source et les résultats sur GitHub</a>.
+      </p>
+    </footer>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
