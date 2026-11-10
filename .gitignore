@@ -1,0 +1,39 @@
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# --- Environnements virtuels ---------------------------------------------------
+.venv/
+venv/
+env/
+
+# --- Caches des outils ---------------------------------------------------------
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# --- Notebooks -----------------------------------------------------------------
+.ipynb_checkpoints/
+
+# --- Éditeurs / OS ---------------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Sorties du projet -----------------------------------------------------------
+# Images de debug produites par `--debug` (les plus parlantes vont dans docs/images/).
+debug/
+outputs/
+# Les données d'entraînement sont générées, pas versionnées.
+training/data/
+# Gros checkpoints : seul le petit modèle final dans models/ est versionné.
+*.ckpt
+models/*.pt
+!models/digits_cnn.pt

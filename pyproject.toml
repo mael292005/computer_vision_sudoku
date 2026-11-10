@@ -1,0 +1,92 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sudoku-vision"
+version = "0.1.0"
+description = "Bot de computer vision qui lit une grille de Sudoku à l'écran, la résout et la remplit."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Maël Bourgeois" }]
+keywords = ["computer-vision", "opencv", "sudoku", "ocr", "pytorch", "automation"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+dependencies = [
+    "numpy>=1.26",
+    "opencv-python-headless>=4.9",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+# Capture d'écran et contrôle souris/clavier (nécessite une session graphique).
+screen = ["mss>=9.0", "pyautogui>=0.9.54"]
+# Modèle de reconnaissance des chiffres (entraînement et inférence).
+ml = ["torch>=2.2", "torchvision>=0.17"]
+# Référence Tesseract, pour comparer avec le CNN.
+ocr = ["pytesseract>=0.3.10"]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.10",
+    "pre-commit>=3.7",
+]
+
+[project.scripts]
+sudoku-vision = "sudoku_vision.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sudoku_vision"]
+
+# --- Ruff : lint + formatage -------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # tri des imports
+    "B",        # bugbear
+    "UP",       # pyupgrade
+    "SIM",      # simplifications
+    "N",        # conventions de nommage
+    "RUF",      # règles propres à ruff
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+# --- Mypy : typage statique ----------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = "src"
+packages = ["sudoku_vision"]
+
+[[tool.mypy.overrides]]
+module = ["cv2.*", "mss.*", "pyautogui.*", "pytesseract.*"]
+ignore_missing_imports = true
+
+# --- Pytest -------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "screen: nécessite une vraie session graphique (ignoré en CI)",
+]
+
+[tool.coverage.run]
+source = ["sudoku_vision"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
