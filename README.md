@@ -244,3 +244,5 @@ Chaque push relance ces vérifications dans GitHub Actions, sur Python 3.11 et 3
 ## Licence
 
 [MIT](LICENSE)
+
+
